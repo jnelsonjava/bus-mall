@@ -21,12 +21,14 @@ That's enough to get started, be liberal with variables for the time being so it
 var productArray = []; // list of all products
 var imageUlId = 'productImages';
 var concurrentImageSetting = 3;
-var maxVotesAllowed = 25; // default to 25
+var maxVotesAllowed = 10; // default to 25
 var totalVotesUsed = 0;
 
 var queuedProducts = []; // list of products waiting for display
 var displayedProducts = []; // list of products currently on display
 var postDisplayProducts = []; // list of already viewed products
+
+var productListEl = document.getElementById(imageUlId);
 
 
 
@@ -40,6 +42,7 @@ function Product(name, src) {
   this.timesDisplayed = 0;
   this.imgNode = document.createElement('img');
   this.liNode = document.createElement('li');
+  // var productArray = [];
 
   productArray.push(this);
   queuedProducts.push(this);
@@ -125,7 +128,7 @@ function displayFinalTally() {
   var voteResultsEl = document.getElementById('voteResults');
   for (var i = 0; i < productArray.length; i++) {
     var singleResultLi = document.createElement('li');
-    singleResultLi.textContent = productArray[i].name + ' had ' + productArray[i].voteTally + ' votes and was shown ' + productArray[i].timesDisplayed + 'times';
+    singleResultLi.textContent = productArray[i].name + ' had ' + productArray[i].voteTally + ' votes and was shown ' + productArray[i].timesDisplayed + ' times';
     voteResultsEl.appendChild(singleResultLi);
   }
 }
@@ -146,36 +149,114 @@ function logVotingEvent(event) {
     if (totalVotesUsed === maxVotesAllowed) {
       productListEl.removeEventListener('click', logVotingEvent);
       displayFinalTally();
+      renderTallyChart();
     }
   }
 }
 
+
+function renderTallyChart() {
+  var productLabels = [];
+  for (var i = 0; i < productArray.length; i++) {
+    productLabels.push(productArray[i].name);
+  }
+
+  var productDisplays = [];
+  for (i = 0; i < productArray.length; i++) {
+    productDisplays.push(productArray[i].timesDisplayed);
+  }
+
+  var productVotes = [];
+  for (i = 0; i < productArray.length; i++) {
+    productVotes.push(productArray[i].voteTally);
+  }
+
+  // using modulo to repeat over array https://stackoverflow.com/questions/59691890/chart-js-repeating-colors
+  var backgroundPalette = [
+    'rgba(255, 99, 132, 0.2)',
+    'rgba(54, 162, 235, 0.2)',
+    'rgba(255, 206, 86, 0.2)',
+    'rgba(75, 192, 192, 0.2)',
+    'rgba(153, 102, 255, 0.2)',
+    'rgba(255, 159, 64, 0.2)'
+  ];
+
+  var bgColors = [];
+  for (i = 0; i < productArray.length; i++) {
+    bgColors.push(backgroundPalette[i % backgroundPalette.length]);
+  }
+
+  var borderPalette = [
+    'rgba(255, 99, 132, 1)',
+    'rgba(54, 162, 235, 1)',
+    'rgba(255, 206, 86, 1)',
+    'rgba(75, 192, 192, 1)',
+    'rgba(153, 102, 255, 1)',
+    'rgba(255, 159, 64, 1)'
+  ];
+
+  var bgBorders = [];
+  for (i = 0; i < productArray.length; i++) {
+    bgBorders.push(borderPalette[i % borderPalette.length]);
+  }
+
+  var ctx = document.getElementById('tallyChart').getContext('2d');
+  var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: productLabels,
+      datasets: [{
+        label: '# of Votes',
+        data: productVotes,
+        backgroundColor: bgColors,
+        borderColor: bgBorders,
+        borderWidth: 1
+      }, {
+        // Marchael helped me figure this part out
+        type: 'line',
+        label: '# of Votes',
+        data: productDisplays,
+        // backgroundColor: bgColors,
+        // borderColor: bgBorders,
+        // borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
+    }
+  });
+}
+
 // Function Calls
 
-new Product('bag', 'img/bag.jpg');
-new Product('banana', 'img/banana.jpg');
-new Product('bathroom', 'img/bathroom.jpg');
-new Product('boots', 'img/boots.jpg');
-new Product('breakfast', 'img/breakfast.jpg');
-new Product('bubblegum', 'img/bubblegum.jpg');
+// new Product('bag', 'img/bag.jpg');
+// new Product('banana', 'img/banana.jpg');
+// new Product('bathroom', 'img/bathroom.jpg');
+// new Product('boots', 'img/boots.jpg');
+// new Product('breakfast', 'img/breakfast.jpg');
+// new Product('bubblegum', 'img/bubblegum.jpg');
 new Product('chair', 'img/chair.jpg');
 new Product('cthulhu', 'img/cthulhu.jpg');
 new Product('dog-duck', 'img/dog-duck.jpg');
 new Product('dragon', 'img/dragon.jpg');
 new Product('pen', 'img/pen.jpg');
 new Product('pet-sweep', 'img/pet-sweep.jpg');
-new Product('scissors', 'img/scissors.jpg');
-new Product('shark', 'img/shark.jpg');
-new Product('sweep', 'img/sweep.png');
-new Product('tauntaun', 'img/tauntaun.jpg');
-new Product('unicorn', 'img/unicorn.jpg');
-new Product('usb', 'img/usb.gif');
-new Product('water-can', 'img/water-can.jpg');
-new Product('wine-glass', 'img/wine-glass.jpg');
+// new Product('scissors', 'img/scissors.jpg');
+// new Product('shark', 'img/shark.jpg');
+// new Product('sweep', 'img/sweep.png');
+// new Product('tauntaun', 'img/tauntaun.jpg');
+// new Product('unicorn', 'img/unicorn.jpg');
+// new Product('usb', 'img/usb.gif');
+// new Product('water-can', 'img/water-can.jpg');
+// new Product('wine-glass', 'img/wine-glass.jpg');
 
 refreshDisplayedProducts();
 
-var productListEl = document.getElementById(imageUlId);
 productListEl.addEventListener('click', logVotingEvent);
-
 
