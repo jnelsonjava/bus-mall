@@ -20,9 +20,8 @@ That's enough to get started, be liberal with variables for the time being so it
 
 var productArray = []; // list of all products
 var imageUlId = 'productImages';
-var productDisplayAmountSetting = 3;
-// !!!!!!!!!!!! Don't forget to set maxVotesallowed back to 25 !!!!!!!!!!!!
-var maxVotesAllowed = 4; // default to 25
+var concurrentImageSetting = 3;
+var maxVotesAllowed = 25; // default to 25
 var totalVotesUsed = 0;
 
 var queuedProducts = []; // list of products waiting for display
@@ -74,8 +73,6 @@ Product.prototype.incrementTimesDisplayed = function() {
 
 
 
-
-
 function refillProductQueue() {
   for (var i = 0; i < postDisplayProducts.length; i++) {
     queuedProducts.push(postDisplayProducts[i]);
@@ -110,7 +107,7 @@ function moveQueuedProductToDisplay() {
 
 function generateNewDisplay() {
   // fill the display array until it has reached its max set amount
-  while (displayedProducts.length < productDisplayAmountSetting) {
+  while (displayedProducts.length < concurrentImageSetting) {
     moveQueuedProductToDisplay();
   }
   // add the new display to the page
@@ -133,27 +130,6 @@ function displayFinalTally() {
   }
 }
 
-
-// Function Calls
-
-new Product('unicorn', 'img/unicorn.jpg');
-new Product('shark', 'img/shark.jpg');
-new Product('tauntaun', 'img/tauntaun.jpg');
-new Product('bag', 'img/bag.jpg');
-new Product('cthulhu', 'img/cthulhu.jpg');
-new Product('pen', 'img/pen.jpg');
-
-
-
-
-refreshDisplayedProducts();
-
-
-
-
-var productListEl = document.getElementById(imageUlId);
-productListEl.addEventListener('click', logVotingEvent);
-
 function logVotingEvent(event) {
   if (event.target.tagName === 'IMG') {
     for (var i = 0; i < displayedProducts.length; i++) {
@@ -174,68 +150,32 @@ function logVotingEvent(event) {
   }
 }
 
+// Function Calls
 
-// productArray[0].removeNodeFromList();
-// productArray[0].addImgNodeToList();
+new Product('bag', 'img/bag.jpg');
+new Product('banana', 'img/banana.jpg');
+new Product('bathroom', 'img/bathroom.jpg');
+new Product('boots', 'img/boots.jpg');
+new Product('breakfast', 'img/breakfast.jpg');
+new Product('bubblegum', 'img/bubblegum.jpg');
+new Product('chair', 'img/chair.jpg');
+new Product('cthulhu', 'img/cthulhu.jpg');
+new Product('dog-duck', 'img/dog-duck.jpg');
+new Product('dragon', 'img/dragon.jpg');
+new Product('pen', 'img/pen.jpg');
+new Product('pet-sweep', 'img/pet-sweep.jpg');
+new Product('scissors', 'img/scissors.jpg');
+new Product('shark', 'img/shark.jpg');
+new Product('sweep', 'img/sweep.png');
+new Product('tauntaun', 'img/tauntaun.jpg');
+new Product('unicorn', 'img/unicorn.jpg');
+new Product('usb', 'img/usb.gif');
+new Product('water-can', 'img/water-can.jpg');
+new Product('wine-glass', 'img/wine-glass.jpg');
 
+refreshDisplayedProducts();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+var productListEl = document.getElementById(imageUlId);
+productListEl.addEventListener('click', logVotingEvent);
 
 
