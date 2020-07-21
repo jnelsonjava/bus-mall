@@ -21,6 +21,9 @@ That's enough to get started, be liberal with variables for the time being so it
 var productArray = []; // list of all products
 var imageUlId = 'productImages';
 var productDisplayAmountSetting = 3;
+// !!!!!!!!!!!! Don't forget to set maxVotesallowed back to 25 !!!!!!!!!!!!
+var maxVotesAllowed = 4; // default to 25
+var totalVotesUsed = 0;
 
 var queuedProducts = []; // list of products waiting for display
 var displayedProducts = []; // list of products currently on display
@@ -121,7 +124,14 @@ function refreshDisplayedProducts() {
   generateNewDisplay();
 }
 
-
+function displayFinalTally() {
+  var voteResultsEl = document.getElementById('voteResults');
+  for (var i = 0; i < productArray.length; i++) {
+    var singleResultLi = document.createElement('li');
+    singleResultLi.textContent = productArray[i].name + ' had ' + productArray[i].voteTally + ' votes and was shown ' + productArray[i].timesDisplayed + 'times';
+    voteResultsEl.appendChild(singleResultLi);
+  }
+}
 
 
 // Function Calls
@@ -155,6 +165,12 @@ function logVotingEvent(event) {
       }
     }
     refreshDisplayedProducts();
+
+    totalVotesUsed++;
+    if (totalVotesUsed === maxVotesAllowed) {
+      productListEl.removeEventListener('click', logVotingEvent);
+      displayFinalTally();
+    }
   }
 }
 
