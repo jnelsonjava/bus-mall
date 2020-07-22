@@ -25,7 +25,7 @@ main {
   margin: auto;
   margin-top: 30px;
   min-height: 600px;
-  background-color: #8b2e3f4d;
+  background-color: #f5d6db;
 }
 
 div {
@@ -43,6 +43,10 @@ div {
 
 .productContainer {
   width: 960px;
+}
+
+#tallyChart {
+  display: none;
 }
 
 .productContainer li {

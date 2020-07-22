@@ -18,7 +18,7 @@ That's enough to get started, be liberal with variables for the time being so it
 
 // Global Variables
 
-var productArray = []; // list of all products
+Product.productArray = []; // list of all products
 var imageUlId = 'productImages';
 var concurrentImageSetting = 3;
 var maxVotesAllowed = 25; // default to 25
@@ -27,6 +27,9 @@ var totalVotesUsed = 0;
 var queuedProducts = []; // list of products waiting for display
 var displayedProducts = []; // list of products currently on display
 var postDisplayProducts = []; // list of already viewed products
+var previousDisplayReference = []; // list of the last displayedProducts
+
+var productListEl = document.getElementById(imageUlId);
 
 
 
@@ -41,7 +44,7 @@ function Product(name, src) {
   this.imgNode = document.createElement('img');
   this.liNode = document.createElement('li');
 
-  productArray.push(this);
+  Product.productArray.push(this);
   queuedProducts.push(this);
 
   this.fillNodesWithContent();
@@ -85,6 +88,7 @@ function emptyDisplay() {
     displayedProducts[i].removeNodeFromList();
     postDisplayProducts.push(displayedProducts[i]);
   }
+  previousDisplayReference = displayedProducts;
   displayedProducts = [];
 }
 
@@ -109,6 +113,13 @@ function generateNewDisplay() {
   // fill the display array until it has reached its max set amount
   while (displayedProducts.length < concurrentImageSetting) {
     moveQueuedProductToDisplay();
+    // reference for how to check if value is in an array without looping https://stackoverflow.com/questions/237104/how-do-i-check-if-an-array-includes-a-value-in-javascript
+
+    // reference for accessing end of array https://stackoverflow.com/questions/3216013/get-the-last-item-in-an-array
+    // checks if the last product added was displayed last round and moves it back into the queue if so
+    if (previousDisplayReference.includes(displayedProducts[displayedProducts.length - 1])) {
+      queuedProducts.push(displayedProducts.pop());
+    }
   }
   // add the new display to the page
   for (var i = 0; i < displayedProducts.length; i++) {
@@ -123,9 +134,9 @@ function refreshDisplayedProducts() {
 
 function displayFinalTally() {
   var voteResultsEl = document.getElementById('voteResults');
-  for (var i = 0; i < productArray.length; i++) {
+  for (var i = 0; i < Product.productArray.length; i++) {
     var singleResultLi = document.createElement('li');
-    singleResultLi.textContent = productArray[i].name + ' had ' + productArray[i].voteTally + ' votes and was shown ' + productArray[i].timesDisplayed + 'times';
+    singleResultLi.textContent = Product.productArray[i].name + ' had ' + Product.productArray[i].voteTally + ' votes and was shown ' + Product.productArray[i].timesDisplayed + ' times';
     voteResultsEl.appendChild(singleResultLi);
   }
 }
@@ -145,9 +156,92 @@ function logVotingEvent(event) {
     totalVotesUsed++;
     if (totalVotesUsed === maxVotesAllowed) {
       productListEl.removeEventListener('click', logVotingEvent);
+      productListEl.style.display = 'none';
       displayFinalTally();
+      renderTallyChart();
     }
   }
+}
+
+
+function renderTallyChart() {
+  document.getElementById('tallyChart').style.display = 'block';
+
+  var productLabels = [];
+  for (var i = 0; i < Product.productArray.length; i++) {
+    productLabels.push(Product.productArray[i].name);
+  }
+
+  var productDisplays = [];
+  for (i = 0; i < Product.productArray.length; i++) {
+    productDisplays.push(Product.productArray[i].timesDisplayed);
+  }
+
+  var productVotes = [];
+  for (i = 0; i < Product.productArray.length; i++) {
+    productVotes.push(Product.productArray[i].voteTally);
+  }
+
+  // using modulo to repeat over array https://stackoverflow.com/questions/59691890/chart-js-repeating-colors
+  var backgroundPalette = [
+    'rgba(255, 99, 132, 0.2)',
+    'rgba(54, 162, 235, 0.2)',
+    'rgba(255, 206, 86, 0.2)',
+    'rgba(75, 192, 192, 0.2)',
+    'rgba(153, 102, 255, 0.2)',
+    'rgba(255, 159, 64, 0.2)'
+  ];
+
+  var bgColors = [];
+  for (i = 0; i < Product.productArray.length; i++) {
+    bgColors.push(backgroundPalette[i % backgroundPalette.length]);
+  }
+
+  var borderPalette = [
+    'rgba(255, 99, 132, 1)',
+    'rgba(54, 162, 235, 1)',
+    'rgba(255, 206, 86, 1)',
+    'rgba(75, 192, 192, 1)',
+    'rgba(153, 102, 255, 1)',
+    'rgba(255, 159, 64, 1)'
+  ];
+
+  var bgBorders = [];
+  for (i = 0; i < Product.productArray.length; i++) {
+    bgBorders.push(borderPalette[i % borderPalette.length]);
+  }
+
+  var ctx = document.getElementById('tallyChart').getContext('2d');
+  var myChart = new Chart(ctx, { // eslint-disable-line
+    type: 'bar',
+    data: {
+      labels: productLabels,
+      datasets: [{
+        label: 'Total Votes',
+        data: productVotes,
+        backgroundColor: bgColors,
+        borderColor: bgBorders,
+        borderWidth: 1
+      }, {
+        // Marchael helped me figure this part out
+        type: 'line',
+        label: 'Total Displays',
+        data: productDisplays,
+        // backgroundColor: bgColors,
+        // borderColor: bgBorders,
+        // borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
+    }
+  });
 }
 
 // Function Calls
@@ -175,7 +269,5 @@ new Product('wine-glass', 'img/wine-glass.jpg');
 
 refreshDisplayedProducts();
 
-var productListEl = document.getElementById(imageUlId);
 productListEl.addEventListener('click', logVotingEvent);
-
 
