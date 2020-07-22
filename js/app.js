@@ -18,15 +18,16 @@ That's enough to get started, be liberal with variables for the time being so it
 
 // Global Variables
 
-var productArray = []; // list of all products
+Product.productArray = []; // list of all products
 var imageUlId = 'productImages';
 var concurrentImageSetting = 3;
-var maxVotesAllowed = 10; // default to 25
+var maxVotesAllowed = 25; // default to 25
 var totalVotesUsed = 0;
 
 var queuedProducts = []; // list of products waiting for display
 var displayedProducts = []; // list of products currently on display
 var postDisplayProducts = []; // list of already viewed products
+var previousDisplayReference = []; // list of the last displayedProducts
 
 var productListEl = document.getElementById(imageUlId);
 
@@ -42,9 +43,8 @@ function Product(name, src) {
   this.timesDisplayed = 0;
   this.imgNode = document.createElement('img');
   this.liNode = document.createElement('li');
-  // var productArray = [];
 
-  productArray.push(this);
+  Product.productArray.push(this);
   queuedProducts.push(this);
 
   this.fillNodesWithContent();
@@ -88,6 +88,7 @@ function emptyDisplay() {
     displayedProducts[i].removeNodeFromList();
     postDisplayProducts.push(displayedProducts[i]);
   }
+  previousDisplayReference = displayedProducts;
   displayedProducts = [];
 }
 
@@ -112,6 +113,13 @@ function generateNewDisplay() {
   // fill the display array until it has reached its max set amount
   while (displayedProducts.length < concurrentImageSetting) {
     moveQueuedProductToDisplay();
+    // reference for how to check if value is in an array without looping https://stackoverflow.com/questions/237104/how-do-i-check-if-an-array-includes-a-value-in-javascript
+
+    // reference for accessing end of array https://stackoverflow.com/questions/3216013/get-the-last-item-in-an-array
+    // checks if the last product added was displayed last round and moves it back into the queue if so
+    if (previousDisplayReference.includes(displayedProducts[displayedProducts.length - 1])) {
+      queuedProducts.push(displayedProducts.pop());
+    }
   }
   // add the new display to the page
   for (var i = 0; i < displayedProducts.length; i++) {
@@ -126,9 +134,9 @@ function refreshDisplayedProducts() {
 
 function displayFinalTally() {
   var voteResultsEl = document.getElementById('voteResults');
-  for (var i = 0; i < productArray.length; i++) {
+  for (var i = 0; i < Product.productArray.length; i++) {
     var singleResultLi = document.createElement('li');
-    singleResultLi.textContent = productArray[i].name + ' had ' + productArray[i].voteTally + ' votes and was shown ' + productArray[i].timesDisplayed + ' times';
+    singleResultLi.textContent = Product.productArray[i].name + ' had ' + Product.productArray[i].voteTally + ' votes and was shown ' + Product.productArray[i].timesDisplayed + ' times';
     voteResultsEl.appendChild(singleResultLi);
   }
 }
@@ -148,6 +156,7 @@ function logVotingEvent(event) {
     totalVotesUsed++;
     if (totalVotesUsed === maxVotesAllowed) {
       productListEl.removeEventListener('click', logVotingEvent);
+      productListEl.style.display = 'none';
       displayFinalTally();
       renderTallyChart();
     }
@@ -156,19 +165,21 @@ function logVotingEvent(event) {
 
 
 function renderTallyChart() {
+  document.getElementById('tallyChart').style.display = 'block';
+
   var productLabels = [];
-  for (var i = 0; i < productArray.length; i++) {
-    productLabels.push(productArray[i].name);
+  for (var i = 0; i < Product.productArray.length; i++) {
+    productLabels.push(Product.productArray[i].name);
   }
 
   var productDisplays = [];
-  for (i = 0; i < productArray.length; i++) {
-    productDisplays.push(productArray[i].timesDisplayed);
+  for (i = 0; i < Product.productArray.length; i++) {
+    productDisplays.push(Product.productArray[i].timesDisplayed);
   }
 
   var productVotes = [];
-  for (i = 0; i < productArray.length; i++) {
-    productVotes.push(productArray[i].voteTally);
+  for (i = 0; i < Product.productArray.length; i++) {
+    productVotes.push(Product.productArray[i].voteTally);
   }
 
   // using modulo to repeat over array https://stackoverflow.com/questions/59691890/chart-js-repeating-colors
@@ -182,7 +193,7 @@ function renderTallyChart() {
   ];
 
   var bgColors = [];
-  for (i = 0; i < productArray.length; i++) {
+  for (i = 0; i < Product.productArray.length; i++) {
     bgColors.push(backgroundPalette[i % backgroundPalette.length]);
   }
 
@@ -196,17 +207,17 @@ function renderTallyChart() {
   ];
 
   var bgBorders = [];
-  for (i = 0; i < productArray.length; i++) {
+  for (i = 0; i < Product.productArray.length; i++) {
     bgBorders.push(borderPalette[i % borderPalette.length]);
   }
 
   var ctx = document.getElementById('tallyChart').getContext('2d');
-  var myChart = new Chart(ctx, {
+  var myChart = new Chart(ctx, { // eslint-disable-line
     type: 'bar',
     data: {
       labels: productLabels,
       datasets: [{
-        label: '# of Votes',
+        label: 'Total Votes',
         data: productVotes,
         backgroundColor: bgColors,
         borderColor: bgBorders,
@@ -214,7 +225,7 @@ function renderTallyChart() {
       }, {
         // Marchael helped me figure this part out
         type: 'line',
-        label: '# of Votes',
+        label: 'Total Displays',
         data: productDisplays,
         // backgroundColor: bgColors,
         // borderColor: bgBorders,
@@ -235,26 +246,26 @@ function renderTallyChart() {
 
 // Function Calls
 
-// new Product('bag', 'img/bag.jpg');
-// new Product('banana', 'img/banana.jpg');
-// new Product('bathroom', 'img/bathroom.jpg');
-// new Product('boots', 'img/boots.jpg');
-// new Product('breakfast', 'img/breakfast.jpg');
-// new Product('bubblegum', 'img/bubblegum.jpg');
+new Product('bag', 'img/bag.jpg');
+new Product('banana', 'img/banana.jpg');
+new Product('bathroom', 'img/bathroom.jpg');
+new Product('boots', 'img/boots.jpg');
+new Product('breakfast', 'img/breakfast.jpg');
+new Product('bubblegum', 'img/bubblegum.jpg');
 new Product('chair', 'img/chair.jpg');
 new Product('cthulhu', 'img/cthulhu.jpg');
 new Product('dog-duck', 'img/dog-duck.jpg');
 new Product('dragon', 'img/dragon.jpg');
 new Product('pen', 'img/pen.jpg');
 new Product('pet-sweep', 'img/pet-sweep.jpg');
-// new Product('scissors', 'img/scissors.jpg');
-// new Product('shark', 'img/shark.jpg');
-// new Product('sweep', 'img/sweep.png');
-// new Product('tauntaun', 'img/tauntaun.jpg');
-// new Product('unicorn', 'img/unicorn.jpg');
-// new Product('usb', 'img/usb.gif');
-// new Product('water-can', 'img/water-can.jpg');
-// new Product('wine-glass', 'img/wine-glass.jpg');
+new Product('scissors', 'img/scissors.jpg');
+new Product('shark', 'img/shark.jpg');
+new Product('sweep', 'img/sweep.png');
+new Product('tauntaun', 'img/tauntaun.jpg');
+new Product('unicorn', 'img/unicorn.jpg');
+new Product('usb', 'img/usb.gif');
+new Product('water-can', 'img/water-can.jpg');
+new Product('wine-glass', 'img/wine-glass.jpg');
 
 refreshDisplayedProducts();
 

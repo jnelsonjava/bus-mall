@@ -9,6 +9,7 @@ Creating a website for a cookie business including a page for sales data analysi
 ### Attributions:
 
   - Thanks to Marchael Acode and Tif Taylor for help getting charts working.
+  - Thanks to Darius Pasilaban for assistance in applying a variable to a Ojbect class.
 
 ### Links and Resources
 
