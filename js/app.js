@@ -21,7 +21,7 @@ That's enough to get started, be liberal with variables for the time being so it
 Product.productArray = []; // list of all products
 var imageUlId = 'productImages';
 var concurrentImageSetting = 3;
-var maxVotesAllowed = 25; // default to 25
+var maxVotesAllowed = 3; // default to 25
 var totalVotesUsed = 0;
 
 var queuedProducts = []; // list of products waiting for display
@@ -138,9 +138,16 @@ function refreshDisplayedProducts() {
 function displayFinalTally() {
   var voteResultsEl = document.getElementById('voteResults');
   for (var i = 0; i < Product.productArray.length; i++) {
-    var singleResultLi = document.createElement('li');
-    singleResultLi.textContent = Product.productArray[i].name + ' had ' + Product.productArray[i].voteTally + ' votes and was shown ' + Product.productArray[i].timesDisplayed + ' times';
-    voteResultsEl.appendChild(singleResultLi);
+    var trEl = document.createElement('tr');
+    var rowData = [Product.productArray[i].name, Product.productArray[i].voteTally, Product.productArray[i].timesDisplayed];
+    for (var j in rowData) {
+      console.log(rowData);
+      var singleResultLi = document.createElement('td');
+      singleResultLi.textContent = rowData[j];
+      trEl.appendChild(singleResultLi);
+
+    }
+    voteResultsEl.appendChild(trEl);
   }
 }
 

@@ -41,6 +41,17 @@ div {
   width: 240px;
 }
 
+#voteResults {
+  color: navy;
+  width: 220px;
+  margin-left: 10px;  
+}
+
+#voteResults td {
+  border: navy solid 1px;
+  padding: 2px;
+}
+
 .productContainer {
   width: 960px;
 }
@@ -60,6 +71,8 @@ div {
 
 .productContainer p {
   margin-top: 30px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 img {
