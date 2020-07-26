@@ -24,7 +24,7 @@ main {
   width: 1200px;
   margin: auto;
   margin-top: 30px;
-  min-height: 600px;
+  min-height: 470px;
   background-color: #f5d6db;
 }
 
@@ -33,12 +33,29 @@ div {
   float: left;
   height: 100%;
   min-height: 300px;
-  outline: 1px solid red;
   box-sizing: border-box;
 }
 
 .resultContainer {
   width: 240px;
+}
+
+#voteResults {
+  color: #5afb00;
+  width: 220px;
+  margin-left: 10px;
+  margin-top: 10px;
+}
+
+#voteResults th {
+  color: #fb0000;
+  width: 220px;
+  margin-left: 10px;  
+}
+
+#voteResults td {
+  border: #923a3a solid 1px;
+  padding: 2px;
 }
 
 .productContainer {
@@ -53,19 +70,19 @@ div {
   width: 320px;
   height: 300px;
   float: left;
-  outline: 1px dotted orange;
   text-align: center;
   padding-top: 10px;
 }
 
 .productContainer p {
   margin-top: 30px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 img {
   width: 300px;
   height: 240px;
-  /* float: left; */
 }
 
 footer h1 {
