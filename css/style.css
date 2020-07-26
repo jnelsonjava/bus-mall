@@ -24,7 +24,7 @@ main {
   width: 1200px;
   margin: auto;
   margin-top: 30px;
-  min-height: 600px;
+  min-height: 470px;
   background-color: #f5d6db;
 }
 
@@ -33,7 +33,6 @@ div {
   float: left;
   height: 100%;
   min-height: 300px;
-  outline: 1px solid red;
   box-sizing: border-box;
 }
 
@@ -42,13 +41,20 @@ div {
 }
 
 #voteResults {
-  color: navy;
+  color: #5afb00;
+  width: 220px;
+  margin-left: 10px;
+  margin-top: 10px;
+}
+
+#voteResults th {
+  color: #fb0000;
   width: 220px;
   margin-left: 10px;  
 }
 
 #voteResults td {
-  border: navy solid 1px;
+  border: #923a3a solid 1px;
   padding: 2px;
 }
 
@@ -64,7 +70,6 @@ div {
   width: 320px;
   height: 300px;
   float: left;
-  outline: 1px dotted orange;
   text-align: center;
   padding-top: 10px;
 }
@@ -78,7 +83,6 @@ div {
 img {
   width: 300px;
   height: 240px;
-  /* float: left; */
 }
 
 footer h1 {

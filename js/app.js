@@ -1,33 +1,17 @@
 'use strict';
 
-/*
-The client wants images to display and viewers to be able to vote on their favorite. And the client as a user wants some control over adjusting that display. Plus the client needs metrics, some to display to the visitor who is voting, and I would expect the client needs some specifically for their own purposes.
-
-To start, this needs a few basic steps to get images up and running:
-
-1. Construct objects for each of the products and their images. This object can store things like total votes, total times displayed, and the <img> node itself can be held as a property.
-
-2. There needs to be a way to add and remove images from the <ul> for display. Options would be to actually add and remove them. Another would be to add all image objects as they are instantiated and set their style.display = 'none'. I'm sure that would work but it might be sloppy considering it would end up with a lot of "dead" html. Regardless, a function built to add/remove could always be reworked to adjust display instead.
-
-3. There needs to be an event listener checking for clicks which triggers:
-  - logging votes for product images
-  - changing images visible for the next vote
-
-That's enough to get started, be liberal with variables for the time being so it's easier to add features later.
-*/
-
 // Global Variables
 
-Product.productArray = []; // list of all products
+Product.productArray = [];
 var imageUlId = 'productImages';
 var concurrentImageSetting = 3;
-var maxVotesAllowed = 3; // default to 25
+var maxVotesAllowed = 25;
 var totalVotesUsed = 0;
 
-var queuedProducts = []; // list of products waiting for display
-var displayedProducts = []; // list of products currently on display
-var postDisplayProducts = []; // list of already viewed products
-var previousDisplayReference = []; // list of the last displayedProducts
+var queuedProducts = [];
+var displayedProducts = [];
+var postDisplayProducts = [];
+var previousDisplayReference = [];
 
 var productListEl = document.getElementById(imageUlId);
 
@@ -36,14 +20,12 @@ var productListEl = document.getElementById(imageUlId);
 // Functions
 
 
-// referenced for adding optional parameters with default values to a function
-// https://www.markhansen.co.nz/javascript-optional-parameters/
 function Product(name, src, voteTally, timesDisplayed) {
 
   this.name = name;
   this.imageSrc = src;
-  this.voteTally = voteTally || 0; // optional parameter
-  this.timesDisplayed = timesDisplayed || 0; // optional parameter
+  this.voteTally = voteTally || 0;
+  this.timesDisplayed = timesDisplayed || 0;
   this.imgNode = document.createElement('img');
   this.liNode = document.createElement('li');
 
@@ -64,7 +46,6 @@ Product.prototype.addImgNodeToList = function() {
 };
 
 Product.prototype.removeNodeFromList = function() {
-  // removing element from its parent https://catalin.red/removing-an-element-with-plain-javascript-remove-method/
   var parentEl = this.liNode.parentNode;
   parentEl.removeChild(this.liNode);
 };
@@ -76,7 +57,6 @@ Product.prototype.incrementVotetally = function() {
 Product.prototype.incrementTimesDisplayed = function() {
   this.timesDisplayed++;
 };
-
 
 
 function refillProductQueue() {
@@ -96,35 +76,25 @@ function emptyDisplay() {
 }
 
 function generateRandomIndex(upperBound) {
-  // referencing for Math.random() https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
   var randIndex = Math.floor(Math.random() * upperBound);
   return randIndex;
 }
 
 function moveQueuedProductToDisplay() {
-  // if queue is empty then refill it from the previously viewed products
   if (queuedProducts.length === 0) {
     refillProductQueue();
   }
-  // splice out a random index from the queue and drop it in the display set
-  // https://love2dev.com/blog/javascript-remove-from-array/
   var randIndex = generateRandomIndex(queuedProducts.length);
   displayedProducts.push(queuedProducts.splice(randIndex, 1)[0]);
 }
 
 function generateNewDisplay() {
-  // fill the display array until it has reached its max set amount
   while (displayedProducts.length < concurrentImageSetting) {
     moveQueuedProductToDisplay();
-    // reference for how to check if value is in an array without looping https://stackoverflow.com/questions/237104/how-do-i-check-if-an-array-includes-a-value-in-javascript
-
-    // reference for accessing end of array https://stackoverflow.com/questions/3216013/get-the-last-item-in-an-array
-    // checks if the last product added was displayed last round and moves it back into the queue if so
     if (previousDisplayReference.includes(displayedProducts[displayedProducts.length - 1])) {
       queuedProducts.push(displayedProducts.pop());
     }
   }
-  // add the new display to the page
   for (var i = 0; i < displayedProducts.length; i++) {
     displayedProducts[i].addImgNodeToList();
   }
@@ -141,7 +111,6 @@ function displayFinalTally() {
     var trEl = document.createElement('tr');
     var rowData = [Product.productArray[i].name, Product.productArray[i].voteTally, Product.productArray[i].timesDisplayed];
     for (var j in rowData) {
-      console.log(rowData);
       var singleResultLi = document.createElement('td');
       singleResultLi.textContent = rowData[j];
       trEl.appendChild(singleResultLi);
@@ -154,9 +123,7 @@ function displayFinalTally() {
 function logVotingEvent(event) {
   if (event.target.tagName === 'IMG') {
     for (var i = 0; i < displayedProducts.length; i++) {
-      // increment the total display amounts for each of the current Product instances
       displayedProducts[i].incrementTimesDisplayed();
-      // increment voteTally only for the Product that was directly clicked
       if (event.target.getAttribute('src') === displayedProducts[i].imageSrc) {
         displayedProducts[i].incrementVotetally();
       }
@@ -173,6 +140,8 @@ function logVotingEvent(event) {
       productListEl.style.display = 'none';
       displayFinalTally();
       renderTallyChart();
+      console.log(document.getElementsByTagName('main'));
+      document.getElementsByTagName('main')[0].style.backgroundColor = 'black';
     }
   }
 }
@@ -196,14 +165,13 @@ function renderTallyChart() {
     productVotes.push(Product.productArray[i].voteTally);
   }
 
-  // using modulo to repeat over array https://stackoverflow.com/questions/59691890/chart-js-repeating-colors
   var backgroundPalette = [
-    'rgba(255, 99, 132, 0.2)',
-    'rgba(54, 162, 235, 0.2)',
-    'rgba(255, 206, 86, 0.2)',
-    'rgba(75, 192, 192, 0.2)',
-    'rgba(153, 102, 255, 0.2)',
-    'rgba(255, 159, 64, 0.2)'
+    'rgba(255, 99, 132, 0.5)',
+    'rgba(54, 162, 235, 0.5)',
+    'rgba(255, 206, 86, 0.5)',
+    'rgba(75, 192, 192, 0.5)',
+    'rgba(153, 102, 255, 0.5)',
+    'rgba(255, 159, 64, 0.5)'
   ];
 
   var bgColors = [];
@@ -225,9 +193,8 @@ function renderTallyChart() {
     bgBorders.push(borderPalette[i % borderPalette.length]);
   }
 
-
   var ctx = document.getElementById('tallyChart').getContext('2d');
-  var myChart = new Chart(ctx, { // eslint-disable-line
+  var myChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: productLabels,
@@ -238,13 +205,12 @@ function renderTallyChart() {
         borderColor: bgBorders,
         borderWidth: 1
       }, {
-        // Marchael helped me figure this part out
-        type: 'line',
+        type: 'bar',
         label: 'Total Displays',
         data: productDisplays,
-        // backgroundColor: bgColors,
-        // borderColor: bgBorders,
-        // borderWidth: 1
+        backgroundColor: bgColors,
+        borderColor: bgBorders,
+        borderWidth: 1
       }]
     },
     options: {
@@ -253,6 +219,9 @@ function renderTallyChart() {
           ticks: {
             beginAtZero: true
           }
+        }],
+        xAxes: [{
+          stacked: true
         }]
       }
     }
